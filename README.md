@@ -58,15 +58,42 @@ Company (Empresa)
 
 **Testing:** Cobertura exhaustiva de edge cases con pytest
 
-### 4. Exportes: CSV/XML con cedula + rubros
+### 5. Deployment: Vercel Frontend + Render Backend + Neon DB
 
-**No generamos nómina final**, solo categorías de horas:
-- Worker cedula + name
-- Horas ordinarias, nocturnas, extras, recargos (por tipo)
-- Importables a Siigo, Novasoft, SAP, etc.
+```
+┌──────────────────────────────────────────────────────────────┐
+│                     GitHub Repository                        │
+│  Push to main → Auto-deploy frontend + backend              │
+└────────────┬─────────────────────────────────────┬──────────┘
+             │                                     │
+   ┌─────────▼──────────┐              ┌──────────▼──────────┐
+   │  Vercel (Frontend) │              │  Render (Backend)   │
+   │  React + Vite      │              │  FastAPI + Python   │
+   │  Free tier ✅      │              │  Free tier ✅       │
+   │  https://cronos... │              │  https://api-...    │
+   └────────────────────┘              └────────┬────────────┘
+                                                │ SQL
+                                        ┌───────▼──────────┐
+                                        │  Neon (Database) │
+                                        │  PostgreSQL      │
+                                        │  Free tier ✅    │
+                                        └──────────────────┘
+```
 
-**Formato MVP:** CSV  
-**Post-MVP:** XML, reportes avanzados, descarga programada
+**¿Por qué NOT Vercel para Backend?**
+- ❌ Cold starts: 1-3 segundos (lento para workers)
+- ❌ Timeout: 10s en free tier (payroll calculations podrían tardar más)
+- ❌ Bundle limit: 250MB (Pandas + librerías payroll exceden esto)
+- ❌ Sin WebSockets (futuro: notificaciones real-time)
+
+**¿Por qué SÍ Render para Backend?**
+- ✅ Container Python nativo, sin límites de bundle
+- ✅ Soporte SQLAlchemy + Pandas + cualquier librería Python
+- ✅ Free tier disponible (con spin-down tras 15 min inactividad)
+- ✅ $7/mo tier para siempre-on (perfecto para producción)
+
+**MVP Cost: $0/mo** (Vercel free + Render free + Neon free)  
+**Production Cost: ~$7-46/mo** (Vercel + Render $7 + Neon $19)
 
 
 
@@ -88,11 +115,11 @@ Company (Empresa)
 - **Vitest + React Testing Library**
 
 ### DevOps & Deployment
-- **Neon CLI** para gestión de base de datos (cloud)
-- **Docker & Docker Compose** para desarrollo local
-- **Alembic** para migraciones de BD
-- **Git** + GitHub para versionamiento
-- **Deployment:** ECS, Render, o Cloud Run (contenedores auto-escalables)
+- **Frontend:** Vercel (free tier for MVP, Pro $20/mo for production)
+- **Backend:** Render.com (free tier with sleep, $7/mo paid for always-on)
+- **Database:** Neon (free tier for MVP, $19/mo Launch tier for production)
+- **Total MVP Cost:** $0/mo ✅
+- **Total Production Cost:** ~$7-46/mo (scales with usage)
 
 ## Estructura del Proyecto
 

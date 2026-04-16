@@ -94,6 +94,48 @@ Backend (FastAPI + Python 3.11+)
                └─ HolidayCalendar + SurchargeRules
 ```
 
+### Infrastructure & Deployment Strategy
+
+**Why Hybrid Approach (Vercel + Render + Neon)?**
+- Vercel is perfect for React frontend but NOT suitable for Python FastAPI (cold starts, 10s timeout limit, no WebSockets, 250MB bundle limit)
+- Render.com provides ideal backend hosting for FastAPI: containerized, Python-friendly, free tier available
+- Neon handles database with automatic connection pooling
+
+**Deployment Architecture:**
+
+```
+FRONTEND (React + TypeScript)          BACKEND (FastAPI + Python)         DATABASE
+   Deployed on Vercel                  Deployed on Render.com             Neon (Serverless Postgres)
+   - Free tier ✅                      - Free tier (with sleep) ✅        - Free tier ✅
+   - $0/mo MVP                         - $7/mo paid (no sleep)            - Included connection pooling
+   - Global CDN                        - Docker container                 - Company/SubOrg/Area hierarchy
+   - CI/CD from GitHub                 - GitHub integration               - Workers, Shifts, Timesheets
+   - Environment vars                  - Python 3.11+ runtime            - Holiday calendar
+   - CORS configured to accept          - SQLAlchemy ORM (multi-tenant)   - Surcharge rules
+     requests from Render backend      - Payroll Engine Module
+                                      - Export Service (CSV/XML)
+                                      - Auth Middleware (JWT)
+```
+
+**Deployment Cost Estimates:**
+
+MVP Phase (0-4 months):
+- Frontend (Vercel): **$0/mo** (free tier)
+- Backend (Render free tier): **$0/mo** (spins down after 15 min inactivity)
+- Database (Neon free tier): **$0/mo** (500MB storage, compute included)
+- **Total MVP Cost: $0/mo** ✅
+
+Production Phase (Phase 4+):
+- Frontend (Vercel, optional Pro): **$0-20/mo**
+- Backend (Render paid tier): **$7/mo** (always on)
+- Database (Neon Launch tier): **$19/mo** (when exceeding free tier)
+- **Total Production Cost: ~$7-46/mo** (depending on usage)
+
+**Configuration Notes:**
+- FastAPI CORS middleware must explicitly allow Vercel frontend domain
+- Use Neon connection pooling (SQLAlchemy) to avoid connection exhaustion
+- GitHub integration: push to main → auto-deploy Vercel (frontend) + Render (backend)
+
 ### Multi-Tenancy Strategy
 
 **MVP (Phase 1-3):** ORM-level isolation
