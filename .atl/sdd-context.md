@@ -6,14 +6,17 @@
 **Primary Users:** Workers, Managers, HR Teams  
 **Compliance:** Colombian Código Sustantivo del Trabajo (CST) & Ley 2101/2021  
 
-## Tech Stack
+## Tech Stack (FINAL - Post Architecture Review)
 
 ### Backend
 - **Language:** Python 3.11+
-- **Framework:** FastAPI (async, modern, good for real-time notifications)
-- **Database:** PostgreSQL (JSON support for flexible configurations, compliance with Colombian law transitions)
-- **ORM:** SQLAlchemy 2.0+
-- **Testing:** pytest with pytest-asyncio
+- **Framework:** FastAPI (async, perfect for complex payroll calculations + real-time notifications)
+- **Database:** PostgreSQL 14+ via **Neon** (serverless, auto-scaling, branching for dev/staging)
+  - **Why Neon over Supabase:** Complex Colombian payroll logic needs testable Python, not PL/pgSQL or Edge Functions
+  - **Self-hosting option:** Swap DATABASE_URL to Docker/AWS RDS anytime (zero vendor lock-in)
+- **ORM:** SQLAlchemy 2.0+ (multi-tenancy via ORM queries + PostgreSQL RLS)
+- **Testing:** pytest with pytest-asyncio (extensive coverage for payroll edge cases)
+- **Payroll Engine:** Custom Python module with Pandas (CSV/XML export support)
 - **API Documentation:** OpenAPI/Swagger (built into FastAPI)
 
 ### Frontend
@@ -27,17 +30,18 @@
 
 ### Infrastructure & DevOps
 - **Database Migrations:** Alembic (Python)
-- **Environment:** Docker & Docker Compose (for consistency)
-- **Task Queue:** Celery + Redis (for async payroll calculations, notifications)
-- **API Gateway:** nginx or uvicorn directly
+- **Local Dev:** Docker & Docker Compose (Postgres container locally, or Neon dev database)
+- **Background Tasks:** FastAPI `BackgroundTasks` (for async exports) + optional Celery/Redis post-MVP
+- **Deployment:** Container-based (ECS, Render, Cloud Run) with auto-scaling
 - **Logging:** Python logging + structured logs (JSON)
-- **Authentication:** JWT tokens (FastAPI middleware)
+- **Authentication:** JWT tokens (FastAPI middleware) + optional third-party Auth (Clerk, Auth0)
 
 ### Development Tools
 - **Version Control:** Git + GitHub
 - **Code Quality:** Black, flake8, mypy (Python); ESLint, Prettier (TypeScript)
-- **Secrets Management:** python-dotenv (.env files for local dev)
-- **Documentation:** MkDocs or Sphinx for API docs
+- **Secrets Management:** python-dotenv (.env files for local dev), platform provider for prod
+- **Documentation:** MkDocs for API docs
+- **Database Tooling:** pgAdmin or DBeaver for local dev; Neon CLI for cloud DB management
 
 ## Domain Model (Colombian Labor Law Constraints)
 
@@ -74,13 +78,15 @@
 7. **Verify** - Validate against specs and Colombian law compliance
 8. **Archive** - Release & document decisions
 
-## Critical Questions (To Be Clarified)
+## Critical Questions (RESOLVED)
 
-- [ ] **Payroll Integration:** Generate final payroll file or export categorized hours (Novedades) for external software?
-- [ ] **Clock-In Mechanism:** Biometrics, GPS, mobile, or manual HR entry?
-- [ ] **Grace Periods:** How to handle early/late arrivals (auto-overtime or manager approval)?
-- [ ] **Union Agreements:** Custom surcharge % per company or standard CST only?
-- [ ] **Multi-Tenancy:** Single company or SaaS for multiple organizations?
+- [x] **Payroll Integration:** Export CSV/XML with worker cedula + payroll rubros (not final nómina file)
+- [x] **Clock-In Mechanism:** Honor system (no biometric/GPS) - workers responsible for hour accuracy
+- [x] **Collective Agreements:** Skip for MVP - assume CST standard only
+- [x] **Custom Shifts:** HR creates shift templates with type code (T=tarde, M=mañana, etc.), configurable start/end times per company
+- [x] **Sunday Compensatory:** Defer to stakeholder consultation (not MVP)
+- [x] **Multi-Tenancy:** YES - company → sub-organizations → areas hierarchy. Each area can have different shift grids. Future: subscription model by org size
+- [x] **Backend:** Neon (managed Postgres) + FastAPI (Python). Self-host option available anytime.
 
 ## Git & Development Workflow
 

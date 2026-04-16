@@ -9,23 +9,76 @@ Sistema web para la gestión de turnos de trabajo conforme a la legislación lab
 - **Gestores:** Asignar turnos, aprobar cambios, validar límites de horas
 - **Recursos Humanos:** Exportar información de horas para nómina, generar reportes, auditoría
 
-### Cumplimiento Legal
+### Decisiones Arquitectónicas Clave
 
-Basado en:
-- Código Sustantivo del Trabajo (CST) colombiano
-- Ley 2101/2021 (reforma laboral)
-- Regulación de jornadas (48h → 42h progresivo 2024-2026)
-- Recargos nocturnos, dominicales, festivos
-- Horas extras y límites
+### 1. Backend: Neon + FastAPI (No Supabase)
+
+**¿Por qué Neon en lugar de Supabase?**
+- Supabase es excelente para apps CRUD, pero NO para lógica de nómina compleja
+- La ley laboral colombiana requiere cálculos complejos en Python (testeable, auditable)
+- PL/pgSQL o TypeScript Edge Functions se vuelven unmaintainables
+- Python + pytest es superior para cambios de ley frecuentes (2024-2026)
+
+**Ventajas:**
+- ✅ Neon es solo PostgreSQL → cero vendor lock-in
+- ✅ Auto-scaling + branching para staging seguro
+- ✅ Puedes auto-hospedar cuando quieras (Docker o AWS RDS)
+
+Ver `.atl/backend-decision.md` para análisis completo.
+
+### 2. Multi-Tenancy: Company → SubOrganization → Area
+
+```
+Company (Empresa)
+├── SubOrganization (Sucursal/División)
+│   ├── Area 1 (Recursos, Operaciones)
+│   │   ├── Shift Template: "T" (Tarde 2pm-10pm)
+│   │   ├── Shift Template: "N" (Noche 10pm-6am)
+│   │   └── Workers + Assignments
+│   └── Area 2 (Logística)
+│       ├── Shift Template: "M" (Mañana 6am-2pm)
+│       └── Workers + Assignments
+```
+
+**Implementación MVP:** ORM layer (simple)  
+**Post-MVP:** PostgreSQL RLS (seguridad de base de datos)
+
+### 3. Motor de Nómina: Python (No SQL)
+
+**Ubicación:** `backend/app/services/payroll_engine.py`
+
+**Lógica** (Código Sustantivo del Trabajo colombiano):
+- Clasificación de horas (ordinarias, nocturnas, dominicales, festivas)
+- Recargos: Noche 35%, Domingo 75%, Noche+Domingo 110%
+- Horas extras: Día 25%, Noche 75%, Domingo Día 100%, Domingo Noche 150%
+- Límites: Max 2h/día, 12h/semana
+- Regla de medianoche (turnos que cruzan 00:00)
+- Dominical habitual (3+ domingos/mes)
+- Workweek variable (48h→46h→44h→42h, 2024-2026)
+
+**Testing:** Cobertura exhaustiva de edge cases con pytest
+
+### 4. Exportes: CSV/XML con cedula + rubros
+
+**No generamos nómina final**, solo categorías de horas:
+- Worker cedula + name
+- Horas ordinarias, nocturnas, extras, recargos (por tipo)
+- Importables a Siigo, Novasoft, SAP, etc.
+
+**Formato MVP:** CSV  
+**Post-MVP:** XML, reportes avanzados, descarga programada
+
+
 
 ## Tecnología
 
 ### Backend
 - **Python 3.11+** con FastAPI
-- **PostgreSQL** para persistencia
-- **SQLAlchemy 2.0** (ORM)
-- **Celery + Redis** para tareas asincrónicas
-- **pytest** para testing
+- **PostgreSQL 14+** via **Neon** (serverless, auto-scaling)
+  - Opción de auto-hospedar: Docker o AWS RDS (cero vendor lock-in)
+- **SQLAlchemy 2.0** (ORM) con soporte multi-tenant
+- **pytest** para testing (casos borde de ley laboral colombiana)
+- **Pandas + csv/xml** para generación de exportes
 
 ### Frontend
 - **TypeScript + React 18+**
@@ -34,10 +87,12 @@ Basado en:
 - **Zustand** para state management
 - **Vitest + React Testing Library**
 
-### DevOps
-- **Docker & Docker Compose**
+### DevOps & Deployment
+- **Neon CLI** para gestión de base de datos (cloud)
+- **Docker & Docker Compose** para desarrollo local
 - **Alembic** para migraciones de BD
-- **Git** + GitHub
+- **Git** + GitHub para versionamiento
+- **Deployment:** ECS, Render, o Cloud Run (contenedores auto-escalables)
 
 ## Estructura del Proyecto
 
