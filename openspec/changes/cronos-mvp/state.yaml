@@ -1,0 +1,21 @@
+Change: cronos-mvp
+Title: Cronos MVP - Colombian Shift Management System
+Status: proposed
+Phases:
+  - exploration: ✅ Complete
+  - proposal: ✅ In Review
+  - specification: ⏳ Pending
+  - design: ⏳ Pending
+  - tasks: ⏳ Pending
+  - apply: ⏳ Pending
+  - verify: ⏳ Pending
+  - archive: ⏳ Pending
+
+Artifacts:
+  - proposal: cronos-mvp/proposal.md
+  - exploration: ../.atl/sdd-context.md
+  - domain-model: ../.atl/domain-model.md
+  - backend-decision: ../.atl/backend-decision.md
+
+Created: 2026-04-16
+Last Updated: 2026-04-16
