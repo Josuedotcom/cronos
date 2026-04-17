@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Outlet, Link } from 'react-router-dom'
 import { useAuthStore } from '../stores/authStore'
 import { Menu, X, LogOut, User } from 'lucide-react'
 
@@ -16,12 +16,12 @@ export default function DashboardLayout() {
 
   const menuItems = [
     { label: 'Dashboard', href: '/dashboard', icon: '📊' },
-    { label: 'Shifts', href: '/dashboard/shifts', icon: '📅' },
-    { label: 'Payroll', href: '/dashboard/payroll', icon: '💰' },
+    { label: 'Turnos', href: '/dashboard/shifts', icon: '📅' },
+    { label: 'Nómina', href: '/dashboard/payroll', icon: '💰' },
     ...(user?.role === 'MANAGER' || user?.role === 'HR_ADMIN'
       ? [
-          { label: 'Swap Requests', href: '/dashboard/swaps', icon: '🔄' },
-          { label: 'Admin', href: '/dashboard/admin', icon: '⚙️' },
+          { label: 'Cambios de Turno', href: '/dashboard/swaps', icon: '🔄' },
+          { label: 'Administración', href: '/dashboard/admin', icon: '⚙️' },
         ]
       : []),
   ]
@@ -46,14 +46,14 @@ export default function DashboardLayout() {
 
         <nav className="flex-1 px-2 py-4 space-y-2">
           {menuItems.map((item) => (
-            <a
+            <Link
               key={item.href}
-              href={item.href}
+              to={item.href}
               className="flex items-center px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
             >
               <span className="text-xl">{item.icon}</span>
               {sidebarOpen && <span className="ml-3">{item.label}</span>}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -72,7 +72,7 @@ export default function DashboardLayout() {
                   className="w-full flex items-center px-4 py-2 text-red-400 hover:bg-gray-700 rounded-lg"
                 >
                   <LogOut size={16} />
-                  <span className="ml-2">Logout</span>
+                  <span className="ml-2">Salir</span>
                 </button>
               </div>
             )}
@@ -93,12 +93,7 @@ export default function DashboardLayout() {
 
         {/* Content Area */}
         <main className="flex-1 overflow-auto p-6">
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Cronos</h2>
-            <p className="text-gray-600">
-              This is your dashboard. Navigate using the sidebar to view shifts, payroll, and manage your schedule.
-            </p>
-          </div>
+          <Outlet />
         </main>
       </div>
     </div>
