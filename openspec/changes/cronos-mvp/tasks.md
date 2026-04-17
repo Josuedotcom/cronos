@@ -170,9 +170,9 @@
 
 | Task ID | Title | Effort | Dependencies | Status |
 |---------|-------|--------|--------------|--------|
-| **BE-009** | Payroll Engine: Hour Classification Algorithm | 8 SP | BE-003 | Pending |
-| **BE-010** | Payroll Engine: Surcharge & Overtime Calculation | 8 SP | BE-009 | Pending |
-| **BE-011** | Payroll Engine: Unit Tests (100+ cases) | 8 SP | BE-010 | Pending |
+| **BE-009** | Payroll Engine: Hour Classification Algorithm | 8 SP | BE-003 | Complete ✅ |
+| **BE-010** | Payroll Engine: Surcharge & Overtime Calculation | 8 SP | BE-009 | Complete ✅ |
+| **BE-011** | Payroll Engine: Unit Tests (100+ cases) | 8 SP | BE-010 | Complete ✅ |
 
 #### BE-009: Payroll Engine - Hour Classification Algorithm
 - **Description:** Core algorithm to classify work hours (ordinarias, nocturnas, extras, recargos dominicales)
