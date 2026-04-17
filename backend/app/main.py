@@ -5,7 +5,7 @@ from fastapi import Depends
 from app.auth.rbac import require_role
 from app.config import settings
 from app.middleware.tenant import TenantMiddleware
-from app.routers import auth
+from app.routers import auth, shifts, holidays, payroll
 
 
 app = FastAPI(
@@ -30,6 +30,9 @@ app.add_middleware(
 app.add_middleware(TenantMiddleware)
 
 app.include_router(auth.router, prefix="/auth", tags=["authentication"])
+app.include_router(shifts.router)
+app.include_router(holidays.router)
+app.include_router(payroll.router)
 
 
 @app.get("/health")
