@@ -97,10 +97,15 @@
 
 | Task ID | Title | Effort | Dependencies | Status |
 |---------|-------|--------|--------------|--------|
-| **BE-005** | JWT Token Generation & Verification | 3 SP | BE-001 | Pending |
-| **BE-006** | Authentication Endpoints (login, refresh, logout) | 3 SP | BE-005, BE-003 | Pending |
-| **BE-007** | Multi-Tenant Middleware (inject company_id) | 3 SP | BE-006 | Pending |
-| **BE-008** | Role-Based Access Control (RBAC) | 2 SP | BE-007 | Pending |
+| **BE-005** | JWT Token Generation & Verification | 3 SP | BE-001 | Complete |
+| **BE-006** | Authentication Endpoints (login, refresh, logout) | 3 SP | BE-005, BE-003 | Complete |
+| **BE-007** | Multi-Tenant Middleware (inject company_id) | 3 SP | BE-006 | Complete |
+| **BE-008** | Role-Based Access Control (RBAC) | 2 SP | BE-007 | Complete |
+
+- [x] **BE-005** JWT Token Generation & Verification
+- [x] **BE-006** Authentication Endpoints (login, refresh, logout)
+- [x] **BE-007** Multi-Tenant Middleware (inject company_id)
+- [x] **BE-008** Role-Based Access Control (RBAC)
 
 #### BE-005: JWT Token Generation & Verification
 - **Description:** Implement JWT token creation, validation, and refresh logic
