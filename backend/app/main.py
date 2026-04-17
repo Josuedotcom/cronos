@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Depends
 
+from app.auth.rbac import require_role
 from app.config import settings
+from app.middleware.tenant import TenantMiddleware
+from app.routers import auth
 
 
 app = FastAPI(
@@ -23,6 +27,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(TenantMiddleware)
+
+app.include_router(auth.router, prefix="/auth", tags=["authentication"])
+
 
 @app.get("/health")
 async def health_check() -> dict[str, str]:
@@ -30,3 +38,10 @@ async def health_check() -> dict[str, str]:
         "status": "ok",
         "environment": settings.environment_label,
     }
+
+
+@app.get("/auth/rbac-example")
+async def rbac_example(
+    _: str = Depends(require_role("manager", "hr_admin")),
+) -> dict[str, str]:
+    return {"message": "You have sufficient permissions."}
